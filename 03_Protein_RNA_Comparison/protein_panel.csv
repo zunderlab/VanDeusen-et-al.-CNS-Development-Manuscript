@@ -1,0 +1,44 @@
+ab_name,ab_metal_label,common_name,clustering,summarize,CLASS,optimized_thresh,plot_order
+A2B5,A2B5_In115Di,1,1,0,NA,0,0
+ALDH1A1,ALDH1A1_Ho165Di,ALDH1A1,1,1,Enzyme,2,31
+BLBP,BLBP_Yb172Di,FABP7,1,1,Accessory Protein,1,34
+CD11b,CD11b_Gd158Di,ITGAM,1,1,Cell Adhesion Molecule,2,24
+CD24,CD24_Tb159Di,CD24,1,0,Cell Surface Antigen,6,0
+CD45,CD45_Sm149Di,PTPRC,1,1,Cell Surface Receptor,1.5,21
+cl_Casp3,cl_Casp3_Yb173Di,1,1,0,NA,0,0
+Ctip2,Ctip2_Er168Di,BCL11B,1,1,Transcription Factor,0.4,6
+Cux1,Cux1_Er170Di,CUX1,1,1,Transcription Factor,3,7
+Dcx,Dcx_Dy163Di,DCX,1,1,Cytoskeletal-Related,1.3,12
+F4,F4_Lu175Di,ADGRE1,1,1,Cell Surface Receptor,2,22
+GAD65,GAD65_Dy162Di,GAD2,1,1,Enzyme,0.5,30
+GFAP,GFAP_Tm169Di,GFAP,1,1,Neurofilament,3,15
+GLAST,GLAST_Er167Di,SLC1A3,1,1,Enzyme,2.8,20
+Ki67,Ki67_Sm152Di,MKI67,1,1,Accessory Protein,4,35
+Ly_6C,Ly_6C_Er166Di,1,1,0,NA,0,0
+MAP2,MAP2_Dy164Di,MAP2,1,1,Cytoskeletal-Related,0.7,14
+MCAM,MCAM_Gd155Di,MCAM,1,1,Cell Adhesion Molecule,4,26
+N_Cadherin,N_Cadherin_Dy161Di,CDH2,1,1,Cell Adhesion Molecule,1,23
+Nestin,Nestin_Nd144Di,NES,1,1,Cytoskeletal-Related,0.45,11
+NeuN,NeuN_Nd150Di,RBFOX3,1,1,Accessory Protein,1.5,33
+NeuroD1,NeuroD1_Gd156Di,NEUROD1,1,1,Transcription Factor,1.5,4
+Olig2,Olig2_In113Di,OLIG2,1,1,Transcription Factor,1.6,8
+OligoO4,OligoO4_Eu153Di,1,1,0,NA,0,0
+p75NTR,p75NTR_Yb176Di,NGFR,1,1,Neurotrophic Receptor,1.3,19
+Pax6,Pax6_Sm154Di,PAX6,1,1,Transcription Factor,0.8,2
+PDGFRa,PDGFRa_Sm147Di,PDGFRA,1,1,Neurotrophic Receptor,1,16
+PDGFRb,PDGFRb_Pr141Di,PDGFRB,1,1,Neurotrophic Receptor,2,17
+PECAM1,PECAM1_Nd143Di,PECAM1,1,1,Cell Adhesion Molecule,2,27
+Prominin,Prominin_Nd148Di,PROM1,1,1,Cell Surface Antigen,0.5,28
+PSA_NCAM,PSA_NCAM_La139Di,1,1,0,NA,0,0
+Sox1,Sox1_Nd145Di,SOX1,1,1,Transcription Factor,0.6,10
+Sox10,Sox10_Eu151Di,SOX10,1,1,Transcription Factor,2.7,9
+Sox2,Sox2_Gd160Di,SOX2,1,1,Transcription Factor,1.67,1
+SSEA_1,SSEA_1_Gd157Di,FUT4,1,1,Enzyme,2,32
+Tbr1,Tbr1_Yb171Di,TBR1,1,1,Transcription Factor,1,5
+Tbr2,Tbr2_Nd146Di,EOMES,1,1,Transcription Factor,0.8,3
+TrkB,TrkB_Yb174Di,NTRK2,1,1,Neurotrophic Receptor,1,18
+TuJ1,TuJ1_Y89Di,TUBB3,1,1,Cytoskeletal-Related,2,13
+VCAM1,VCAM1_Nd142Di,VCAM1,1,1,Cell Adhesion Molecule,1.2,25
+Intercalator,Intercalator_Ir191Di,1,0,0,NA,0,0
+File,File,1,0,0,NA,0,0
+BC_3,BC_3_Pd105Di,1,0,0,NA,0,0
