@@ -264,20 +264,6 @@ if (HIGHLIGHT.CLUSTER == TRUE) {
   }
 }
 
-
-#Should work but doesn't
-#if (HIGHLIGHT.CLUSTER == TRUE) {
-  #cluster.nums <- unique(URD_Object.tree@meta$cluster)
-  #for (i in cluster.nums) {
-    #p.cluster.highlight <- plotTreeHighlight(URD_Object.tree, label.type = "meta", label.name="cluster", label.value = i,
-                                             #color = "red", bg.color = "#CCCCCC", highlight.alpha = 1, highlight.size = 10)
-    #p.cluster.highlight.filename <- paste0(OUTPUT.BASENAME, "Cluster_",i,".", OUTPUT.DEVICE) # Generate output filename
-    #ggsave(p.cluster.highlight.filename, plot = p.cluster.highlight, device = OUTPUT.DEVICE) # Save plot output
-  #}
-  
-#}
-
-
 ## Output dendrogram colored by tissue ============================================================
 if (PLOT.BY.TISSUE == TRUE) {
   p.tissue <- plotTree(URD_Object.tree, label.type = "meta", label = "tissue", title="Tissue") # Tree colored by tissue
@@ -322,9 +308,7 @@ if (OVERWRITE.RDATA == TRUE) {
   save.image("URD_Final.RData")
   #reset working directory
   setwd("..")
-  print("Finished URD_CyTOF_BuildTree.R")
+  print("Finish URD_CyTOF_BuildTree.R")
 } else {
-  print("Finished URD_CyTOF_BuildTree.R")
+  print("Finish URD_CyTOF_BuildTree.R")
 }
-
-print("Finish URD_CyTOF_BuildTree.R")

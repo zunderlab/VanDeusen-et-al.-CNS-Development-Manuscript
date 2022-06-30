@@ -2,7 +2,7 @@
 #2021
 #Adds optional columns to URD metdata file in addition to age/stage (e.g. Tissue and SampleType)
 
-print("Start 03_Get_URD_Metadata.R")
+print("Start Get_URD_Metadata.R")
 
 rm(list = ls())
 .libPaths(c(.libPaths(), "~/R/4.1.1"))
@@ -164,7 +164,7 @@ urd.md.in <- c(filenames.out, stages.out, roots.out, tips.out) # Make list of da
 urd.md <- do.call(cbind, urd.md.in) # Combine dataframs into single data frame
 fwrite(urd.md, file = URD.META.FILENAME)
 
-print("Start 04_Get_URD_Metadata.R")
+print("Finish Get_URD_Metadata.R")
 
 
 

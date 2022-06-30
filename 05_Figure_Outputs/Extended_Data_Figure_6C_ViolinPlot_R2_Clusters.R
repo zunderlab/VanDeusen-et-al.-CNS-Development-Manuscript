@@ -1,18 +1,17 @@
 #Corey Williams, University of Virginia
-#15 July 2019
-#Generate violin plot colored by clusters
+#15 Jul, 2019
+#Plot colored by expression of markers
 
-print("Start Violin_Plot_R2_Clusters.R")
+print("Start ViolinPlot_R2_Clusters.R")
 
 rm(list = ls())
-.libPaths(c(.libPaths(), "~/R/4.1.1"))
+.libPaths("/project/zunderlab/R/4.1.1_URD")
 
 library(ggfortify)
 library(ggstance)
 library(ggpubr)
 library(forcats)
 library(dplyr)
-library(data.table)
 
 print("Libraries loaded")
 
@@ -25,8 +24,8 @@ PANEL_FILENAME <- "panel.csv"
 CLUSTERS_BASENAME <- "cluster_RX_assigns.csv"
 MARKER_ORDER_FILENAME <- "marker_order.csv"
 PLOT_PARAMETERS_FILENAME <- "Dot_Plot_Parameters.csv" #has to be individually crafted with labels and desired colors
-OUTPUT_FILENAME <- "ViolinPlots_R2_Clusters.pdf"
 VIOLIN_HEIGHT_FACTOR <- 5
+
 print("Input parameters loaded")
 
 ## Read needed files
@@ -47,6 +46,7 @@ marker_order <- data.frame(read.csv(paste0(MARKER_ORDER_FILENAME)))
 print("Needed files successfully loaded")
 
 ## Read in custom marker order, cluster order, and color palette
+#plot_vars <- panel[which(panel[,"Plot"]==1), "Fixed_Param"] # Old way, pull in form panel
 plot_vars_ordered <- as.vector(marker_order$order) # Marker order
 VIOLIN.ORDER <- as.vector(plot_parameters$Cluster) # Cluster order
 CUSTOM.PALETTE <- as.vector(plot_parameters$Color) # Custom colors (in order)
@@ -95,4 +95,4 @@ ggsave("ViolinPlots_Custom_Order_Color.pdf",
                        left = text_grob("Cluster",rot=90)),
        height=max(clusters_in)/VIOLIN_HEIGHT_FACTOR,width=length(plot_vars_ordered))
 
-print("Finish Violin_Plot_R2_Clusters.R")
+print("Finish ViolinPlot_R2_Clusters.R")

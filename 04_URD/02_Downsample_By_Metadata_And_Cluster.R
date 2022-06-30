@@ -2,7 +2,7 @@
 #20 September 2021
 ## Downsample by metadata and cluster according to .csv containing values
 
-print("Start 01_Downsample_By_Metadata_And_Cluster.R")
+print("Start Downsample_By_Metadata_And_Cluster.R")
 
 rm(list = ls())
 .libPaths(c(.libPaths(), "~/R/4.1.1"))
@@ -177,7 +177,6 @@ colnames(filenums.df) <- "File"
 filenums.out.filename <- paste0(OUTPUT.FOLDER,"/",FILENUMS.OUT.FILENAME)
 fwrite(filenums.df,file = filenums.out.filename)
 
-print("Output new .csv files for expression matrix, UMAP layout, and clusters")
-print("Finish 01_Downsample_By_Metadata_And_Cluster.R")
+print("Finish Downsample_By_Metadata_And_Cluster.R")
 
   

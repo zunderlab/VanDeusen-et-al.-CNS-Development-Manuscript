@@ -1,10 +1,10 @@
-# Created by Austin Keeler & Ashley Hirt, University of Virginia
+# Created by Austin Keeler & Ashley Hirt
 # 15 July 2020
-# Plot a single UMAP colored by CNS tissue (or other metadata input)
+# Plot a single UMAP colored by a metadata variable
 
-print("Start UMAP_R1_Layout_ColoredBy_CNS_Tissue.R")
+print("Start UMAP_R2_Layout_ColoredBy_CNS_Tissue.R")
 
-rm(list = ls())
+rm(list = ls(all = TRUE))
 .libPaths(c(.libPaths(), "~/R/4.1.1"))
 
 library(ggplot2)
@@ -15,18 +15,15 @@ library(viridis)
 
 # Input parameters ----
 CLUSTER_ROUND <- 1
-
 METADATA_TO_PLOT <- "Tissue" # make sure this matches your metadata column name exactly
-
-#METADATA_ORDER <- NULL
 METADATA_ORDER <- c("Brain","Cortex","Diencephalon","Midbrain","Hindbrain") # if NULL, then metadata will be sorted alphabetically
 #^^ This needs to match with the values in metadata.csv in the METADATA_TO_PLOT column
 
 METADATA_FILENAME <- "metadata.csv"
 FILENUMS_FILENAME <- "filenums.csv"
-LAYOUT_BASENAME <- "umap_xy_RX_shifted.csv"
+LAYOUT_BASENAME <- "umap_xy_RX.csv"
 POINT_SIZE <- 0.00001
-OUTPUT_FILENAME <- paste0("Colored_by_", METADATA_TO_PLOT, "_shifted.png")
+OUTPUT_FILENAME <- paste0("Colored_by_", METADATA_TO_PLOT, ".png")
 LABEL_SIZE <- 5
 CUSTOM.COLOR <- c("#F242F5", "#4E42F5", "#18C92D","#F0F013", "#F01313")
 OUTPUT_FORMAT <- "png" # "png" or "pdf"
@@ -100,4 +97,4 @@ p <- ggplot(data=plot_df, aes(x=umap_x, y=umap_y,
 ggsave(OUTPUT_FILENAME, p, device = OUTPUT_FORMAT,
        height = OUTPUT_HEIGHT, width = OUTPUT_WIDTH)
 
-print("Finish UMAP_R1_Layout_ColoredBy_CNS_Tissue.R")
+print("Finish UMAP_R2_Layout_ColoredBy_CNS_Tissue.R")

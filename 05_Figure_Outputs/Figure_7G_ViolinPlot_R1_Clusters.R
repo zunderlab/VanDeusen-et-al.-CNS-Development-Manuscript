@@ -50,7 +50,6 @@ marker_order <- data.frame(read.csv(paste0(MARKER_ORDER_FILENAME)))
 print("Needed files successfully loaded")
 
 ## Read in custom marker order, cluster order, and color palette
-#plot_vars <- panel[which(panel[,"Plot"]==1), "Fixed_Param"] # Old way, pull in form panel
 plot_vars_ordered <- as.vector(marker_order$order) # Marker order
 VIOLIN.ORDER <- as.vector(plot_parameters$Cluster) # Cluster order
 CUSTOM.PALETTE <- as.vector(plot_parameters$Color) # Custom colors (in order)

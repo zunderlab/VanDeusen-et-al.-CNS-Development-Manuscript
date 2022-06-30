@@ -17,10 +17,8 @@ LAYOUT_BASENAME <- "umap_xy_R1_shifted.csv"
 CLUSTERS_BASENAME <- "cluster_R2_assigns.csv"
 OUTPUT_FILENAME <- "UMAP_R1_layout_R2_clusters_shifted.png"
 COLORS_FILENAME <- "colors_R2.csv"  #.csv with column 'color' containing hex codes or colors for R 
-#OUPUT_BASENAME <- sub("RX_assigns.csv", paste0("R", CLUSTER_ROUND, "_xy."), CLUSTERS_BASENAME)
 OUTPUT_DEVICE <- "png" # "png", "pdf", "jpeg", etc
 POINT_SIZE <- 0.000001
-
 
 print("Input parameters loaded, reading needed files")
 
@@ -63,5 +61,4 @@ p <- ggplot(plot_df, aes(x=umap_x, y=umap_y, color=factor(Cluster))) + scale_col
 output_filename <- OUTPUT_FILENAME
 ggsave(output_filename, p,  device = OUTPUT_DEVICE, height = 21,width = 21)
 
-print("File outputted")
 print("Finish UMAP_R1_Layout_ColoredBy_R2_Clusters.R")

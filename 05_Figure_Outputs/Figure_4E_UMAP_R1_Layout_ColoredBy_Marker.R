@@ -2,7 +2,7 @@
 #15 July 2019
 #Plot colored by expression of markers
 
-print("Start UMAP_R1_Layour_ColoredBy_Marker.R")
+print("Start UMAP_R1_Layout_ColoredBy_Marker.R")
 
 rm(list = ls(all = TRUE))
 .libPaths(c( .libPaths(), "~/R/4.1.1"))
@@ -63,4 +63,4 @@ for (v in plot_vars){
 }
 setwd("..")
 
-print("Finish UMAP_R1_Layour_ColoredBy_Marker.R")
+print("Finish UMAP_R1_Layout_ColoredBy_Marker.R")

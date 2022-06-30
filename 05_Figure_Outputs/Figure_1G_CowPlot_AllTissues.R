@@ -18,7 +18,7 @@ library(cowplot)
 
 ## Input parameters
 INPUT.FOLDER <- getwd()
-FILES.FILENAME <- "filenums.csv" #to get this file from pipeline 1, run Save_file_nums_pipeline1.R to separate the filesnumbs from concattransformed
+FILES.FILENAME <- "filenums.csv" 
 METADATA.FILENAME <- "metadata.csv"
 CLUSTERS.FILENAME <- "cluster_R2_assigns.csv"
 OUTPUT.FILENAME.Totalcells <- "Total_cells_per_timepoint.pdf"
@@ -64,8 +64,7 @@ p <- ggplot(totalcellstimepoint, aes(Age, num_cells, fill = Age)) + geom_col() +
         axis.text = element_text(size = 22), axis.text.x = element_text(angle = 70, hjust=1)) 
 
 # save plot
-#ggsave(OUTPUT.FILENAME.Totalcells, plot = p, device = OUTPUT.DEVICE)
-
+ggsave(OUTPUT.FILENAME.Totalcells, plot = p, device = OUTPUT.DEVICE)
 
 ##Calculate values for Dot Plot ============================================================
 #group matrix by cluster and file then calculate how much of each file in the cluster
@@ -116,7 +115,6 @@ scale.func <- switch(
   'radius' = scale_radius,
   stop("'scale.by' must be either 'size' or 'radius'")
 )
-
 
 #plotting trying to order by manually put in numbers
 order_for_plotting <- ordered_plotting %>% 

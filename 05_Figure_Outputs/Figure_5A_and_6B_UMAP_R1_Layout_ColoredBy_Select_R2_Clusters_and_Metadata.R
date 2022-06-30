@@ -23,7 +23,6 @@ COLORS_FILENAME <- "colors_R2.csv"  #.csv with column 'color' containing hex cod
 FILENUMS_FILENAME <- "filenums.csv"
 GRAY.COLOR <- "#bdbdbd"
 CLUSTERS.GRAY <- c(1:6,9:14,17,18,23:26,28,31:33,35:37,40:63) #Which metadata conditions to gray. Use string or integer to index (e.g. 1,2,3,5)
-  #TipClusters = c(1:6,9:14,17,18,23:26,28,31:33,35:37,40:63)
 GRAY.FILES <- c(1:65) #Which metadata conditions to gray. Use string or integer to index
   #Brain = c(5:112), Cortex = c(1:4,7:14,17:23,26:34,37:44,47:55,58:65,68:75,78:85,88:93,96:104,107:112),
   #Dien = c(1:6,9:16,19:25,29:36,39:46,51:57,62:67,72:77,81:87,90:95,99:106,109:112),
@@ -32,7 +31,6 @@ GRAY.FILES <- c(1:65) #Which metadata conditions to gray. Use string or integer 
   #E11 = c(3:112), E15 = c(1:23,35:112), P0 = c(1:65,76:112), P4 = c(1:104), P0-P4 = c(1:65)
 OUTPUT_DEVICE <- "png" # "png", "pdf", "jpeg", etc
 POINT_SIZE <- 1
-
 
 print("Input parameters loaded, reading needed files")
 
@@ -81,5 +79,4 @@ ggsave(OUTPUT_FILENAME,plot = ggplot() +
                panel.background = element_blank(), axis.line = element_line(colour = "black")) +
          guides(colour = guide_legend(override.aes = list(shape=15, size=8))),height = 21,width = 21)
 
-print("File outputted")
 print("Start UMAP_R1_Layout_ColoredBy_Select_R2_Clusters_and_Metadata.R")

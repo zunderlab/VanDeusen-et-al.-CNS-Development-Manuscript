@@ -87,5 +87,4 @@ if (!dir.exists(WRITE_PATH)) {
 fwrite(metadata_df, file=paste(WRITE_PATH, METADATA_FILENAME, sep='/'), row.names=FALSE)
 fwrite(panel_df, file=paste(WRITE_PATH, PANEL_FILENAME, sep='/'), row.names=FALSE)
 
-print("Metadata files output complete")
 print("Finish 01_Get_Metadata.R")

@@ -5,9 +5,8 @@
 
 print("Start CellCountBarPlot.R")
 
-## LIBRARIES ======================================================================
 rm(list = ls(all = TRUE))
-.libPaths(c( .libPaths(), "~/R/4.0.3"))
+.libPaths(c( .libPaths(), "~/R/4.1.1"))
 
 library(ggplot2)
 

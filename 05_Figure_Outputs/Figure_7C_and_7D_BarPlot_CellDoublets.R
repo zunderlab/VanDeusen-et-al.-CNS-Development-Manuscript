@@ -221,7 +221,6 @@ ggsave(OUTPUT.FILENAME, plot = plot, device = OUTPUT.DEVICE)
 ## Combine flow and CyTOF data frames ============================================
 plot_df_all <- rbind(plot_df_Flow, plot_df_CyTOF)
 COLOR.PALETTE <- c("#F242F5", "#FFCCF2","#4E42F5", "#99C2FF","#18C92D","#ADEBAD","#FFC316","#FFEB99","#FF4E41", "#FFAD99")
-#COLOR.PALETTE <- c("#F242F5","#4E42F5","#18C92D","#FFC316","#FF4E41")
 names(COLOR.PALETTE) <- c('Brain_CyTOF', 'Brain_Flow', 'Cortex_CyTOF', 'Cortex_Flow', 'Dien_CyTOF', 'Dien_Flow',
                           'Mid_CyTOF', 'Mid_Flow', 'Hind_CyTOF', 'Hind_Flow')
 

@@ -18,11 +18,11 @@ library(cowplot)
 
 ## Input parameters
 INPUT.FOLDER <- getwd()
-FILES.FILENAME <- "filenums.csv" #to get this file from pipeline 1, run Save_file_nums_pipeline1.R to separate the filesnumbs from concattransformed
+FILES.FILENAME <- "filenums.csv" 
 METADATA.FILENAME <- "metadata.csv"
 CLUSTERS.FILENAME <- "cluster_R2_assigns.csv"
-OUTPUT.FILENAME.Cowplot <- "CowPlot_R2_ByTissue_Ki67_4_2.pdf"
-CLUSTER.NAMES.ORDER.COLOR <- "Dot_Plot_Parameters_4_2.csv" #has to be individually crafted with labels and desired colors
+OUTPUT.FILENAME.Cowplot <- "CowPlot_R2_ByTissue_Ki67.pdf"
+CLUSTER.NAMES.ORDER.COLOR <- "Dot_Plot_Parameters.csv" #has to be individually crafted with labels and desired colors
 CONCAT.TRANSFORMED.FILENAME <- "/Concat_Transformed.csv"
 OUTPUT.DEVICE <- "pdf" # Choose "png" or "pdf"
 METADATA.TYPE <- "Tissue" # Metadata to sort cow plots by on Y axis
@@ -225,7 +225,6 @@ scale.func <- switch(
   'radius' = scale_radius,
   stop("'scale.by' must be either 'size' or 'radius'")
 )
-
 
 #Generate plot of all markers colored by particular marker
 plot <- ggplot(data = order_for_plotting, mapping = aes_string(x = 'Age', y = 'Tissue')) + #put in matrix containing x (day) and y (cluster)

@@ -25,7 +25,6 @@ OUTPUT.BASENAME <- "Plot_Cluster_Abundances_XX.pdf" #XX Must be used in name for
 INDIVIDUAL.OUTPUTS <- TRUE #TRUE = output each plot individually, FALSE = single file
 OUTPUT.TYPE <- "pdf" # choose png or pdf
 
-
 ## Read in necessary files =====================================================
 metadata <- read.csv(paste0(INPUT.FOLDER,"/",METADATA.FILENAME))
 abundances <- read.table(ABUNDANCES.FILENAME, header=TRUE, sep=",", check.names=FALSE)

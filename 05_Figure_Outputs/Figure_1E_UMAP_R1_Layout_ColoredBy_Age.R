@@ -81,10 +81,6 @@ colnames(plot_df) <- c("umap_x", "umap_y", "md_level")
 set.seed(42)
 plot_df <- plot_df[sample(nrow(plot_df)),]
 row.names(plot_df) <- NULL #remove old indices, so everything has a new order
-
-# This comes from Stack Overflow.  I don't really understand it,
-# but it's what let's us rename legend labels how we want them to look.
-# https://stackoverflow.com/questions/12075037/ggplot-legends-change-labels-order-and-title
 plot_df$md_level <- factor(plot_df$md_level,
                            levels=1:length(metadata_order),
                            labels=names(metadata_order))

@@ -1,11 +1,11 @@
 #Corey Williams, University of Virginia
-#15 July 2019
-#Plot UMAP colored by clusters
+#15 Jul, 2019
+#Generate UMAP plot colored by R1 clusters
 
-print("Start UMAP_R1_Layout_ColoredBy_R2_Clusters.R")
+print("Start UMAP_R1_Layout_ColoredBy_R1_Clusters.R")
 
-rm(list = ls())
-.libPaths(c(.libPaths(), "~/R/4.1.1"))
+rm(list = ls(all = TRUE))
+.libPaths(c( .libPaths(), "~/R/4.1.1"))
 
 library(ggfortify)
 
@@ -14,13 +14,11 @@ print("libraries loaded")
 ## Input parameters ===============================================================================
 CLUSTER_ROUND <- 1
 LAYOUT_BASENAME <- "umap_xy_R1_shifted.csv"
-CLUSTERS_BASENAME <- "cluster_R2_assigns.csv"
-OUTPUT_FILENAME <- "UMAP_R1_layout_R2_clusters_shifted.png"
-COLORS_FILENAME <- "colors_R2.csv"  #.csv with column 'color' containing hex codes or colors for R 
-#OUPUT_BASENAME <- sub("RX_assigns.csv", paste0("R", CLUSTER_ROUND, "_xy."), CLUSTERS_BASENAME)
+CLUSTERS_BASENAME <- "cluster_R1_assigns.csv"
+OUTPUT_FILENAME <- "UMAP_R1_layout_R1_clusters_shifted.png"
+COLORS_FILENAME <- "colors_R1.csv"  #.csv with column 'color' containing hex codes or colors for R (for R1 cluster or groups)
 OUTPUT_DEVICE <- "png" # "png", "pdf", "jpeg", etc
 POINT_SIZE <- 0.000001
-
 
 print("Input parameters loaded, reading needed files")
 
@@ -63,4 +61,5 @@ p <- ggplot(plot_df, aes(x=umap_x, y=umap_y, color=factor(Cluster))) + scale_col
 output_filename <- OUTPUT_FILENAME
 ggsave(output_filename, p,  device = OUTPUT_DEVICE, height = 21,width = 21)
 
-print("Start UMAP_R1_Layout_ColoredBy_R2_Clusters.R")
+print("File outputted")
+print("Finish UMAP_R1_Layout_ColoredBy_R1_Clusters.R")

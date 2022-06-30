@@ -107,9 +107,6 @@ if (is.null(PLOT.COLOR.FACTOR) || (PLOT.COLOR.FACTOR == "Cluster")) {
                                         height= 1200, width= 1600, scale = 3))
 
 } else if (PLOT.COLOR.FACTOR == "Age") {
-  #metadata.col <- match(PLOT.COLOR.FACTOR,names(plot.df.final)) # Figure out column # for metadata
-  #numfactors <- length(unique(plot.df.final[,metadata.col])) # Calculate number of factors to color
-  #color.palette <- plasma(numfactors, alpha = 1) # Generate color palette: Can use any RColorBrewer or viridis palette
   color.palette <- plasma(13, alpha = 1) # Generate color palette: Can use any RColorBrewer or viridis palette
   p <- plot_ly(plot.df.final, type = 'scatter3d', mode = 'markers', 
                x = ~umap_x, y = ~umap_y, z = ~umap_z, 

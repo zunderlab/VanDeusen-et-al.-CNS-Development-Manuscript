@@ -1,10 +1,10 @@
 #Corey Williams, University of Virginia
-#15 July 2019
-#Generate violin plot colored by clusters
+#15 Jul, 2019
+#Generate biolin plot colored byclusters
 
-print("Start Violin_Plot_R2_Clusters.R")
+print("Start ViolinPlot_R1_Clusters.R")
 
-rm(list = ls())
+rm(list = ls(all = TRUE))
 .libPaths(c(.libPaths(), "~/R/4.1.1"))
 
 library(ggfortify)
@@ -12,20 +12,18 @@ library(ggstance)
 library(ggpubr)
 library(forcats)
 library(dplyr)
-library(data.table)
 
 print("Libraries loaded")
 
 ## Input parameters
 INPUT_FOLDER <- getwd()
-CLUSTER_ROUND <- 2
+CLUSTER_ROUND <- 1
 EXPRS_MAT_INFILE <- "expression_matrix_analysis.csv"
 EXPRS_MAT_OTHER <- "expression_matrix_other.csv"
 PANEL_FILENAME <- "panel.csv"
 CLUSTERS_BASENAME <- "cluster_RX_assigns.csv"
 MARKER_ORDER_FILENAME <- "marker_order.csv"
-PLOT_PARAMETERS_FILENAME <- "Dot_Plot_Parameters.csv" #has to be individually crafted with labels and desired colors
-OUTPUT_FILENAME <- "ViolinPlots_R2_Clusters.pdf"
+PLOT_PARAMETERS_FILENAME <- "Dot_Plot_Parameters_R1.csv" #has to be individually crafted with labels and desired colors
 VIOLIN_HEIGHT_FACTOR <- 5
 print("Input parameters loaded")
 
@@ -48,6 +46,7 @@ print("Needed files successfully loaded")
 
 ## Read in custom marker order, cluster order, and color palette
 plot_vars_ordered <- as.vector(marker_order$order) # Marker order
+plot_vars_ordered <- plot_vars_ordered[!plot_vars_ordered %in% "Cluster"] #Makes sure clusters not included in list
 VIOLIN.ORDER <- as.vector(plot_parameters$Cluster) # Cluster order
 CUSTOM.PALETTE <- as.vector(plot_parameters$Color) # Custom colors (in order)
 
@@ -90,9 +89,9 @@ plist = sapply(plot_vars_ordered, function(marker_plot) {
 print("List of violin plots by cluster generated")
 
 #save Violin plots
-ggsave("ViolinPlots_Custom_Order_Color.pdf",
+ggsave("ViolinPlots_Custom_Order_Color_R1.pdf",
        annotate_figure(ggarrange(plotlist = plist,ncol=length(plist)),
                        left = text_grob("Cluster",rot=90)),
        height=max(clusters_in)/VIOLIN_HEIGHT_FACTOR,width=length(plot_vars_ordered))
 
-print("Finish Violin_Plot_R2_Clusters.R")
+print("Finish ViolinPlot_R1_Clusters.R")

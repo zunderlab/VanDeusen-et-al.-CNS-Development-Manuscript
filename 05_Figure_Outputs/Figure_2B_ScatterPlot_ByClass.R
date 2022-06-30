@@ -16,7 +16,7 @@ library(reshape2)
 # Input parameters
 INPUT.FOLDER <- getwd()
 OUTPUT.FOLDER <- INPUT.FOLDER
-SAMPLE.CELLS.FILENAME <- "Total_Cells_ByClass.csv" # Can use this instead of FILENUMS.FILENAME
+SAMPLE.CELLS.FILENAME <- "Total_Cells_ByClass.csv" 
 OUTPUT.BASENAME <- "CellClasses_Plot_Cluster.pdf"
 OUTPUT.DEVICE <- "pdf"
 COLOR.PALETTE <- c("Brain"="#F242F5", "Cortex"="#4E42F5","Diencephalon"="#18C92D",

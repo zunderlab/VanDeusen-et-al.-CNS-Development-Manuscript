@@ -104,7 +104,6 @@ pheatmap_df <- as.matrix(plot_list_df[,1:40])
 pheatmap_df <- t(pheatmap_df)
 colnames(pheatmap_df) <- METADATA_ORDER
 
-
 low_colors <- viridis(500, begin=0, end=0.2)
 mid_colors <- viridis(500, begin=0.2, end=0.95)
 high_colors <- viridis(300, begin = 0.95, end = 1)
@@ -124,12 +123,6 @@ save_pheatmap_pdf <- function(x, filename, width=7, height=7) {
 }
 save_pheatmap_pdf(plot, OUTPUT_FILENAME)
 
-# Add age labels to dataframe
-#new_ages <- as.data.frame(METADATA_ORDER)
-#plot_list_df <- cbind(plot_list_df,new_ages)
-#plot_list_df$Age <- NULL # Take out numerical ages (can leave in...just labeled 1 <- n)
-#names(plot_list_df)[names(plot_list_df) == 'METADATA_ORDER'] <- 'Age' # Replace with age names e.g. "E11"
-
 # Transform dataframe into format for ggplot heatmap
 plot_df_final <- reshape::melt(plot_list_df, id.vars = 'Age')
 colnames(plot_df_final) <- c("Age","Marker","Mean_Expression")
@@ -142,7 +135,6 @@ if (!is.null(MARKER_ORDER_FILENAME)) {
   ggplot(plot_df_final, aes(x = Age, y = Marker, fill = Mean_Expression)) +
     geom_tile() +
     coord_fixed()
-  
   
 } else {
   ## ADD HEATMAP WITH HIERARCHICAL CLUSTERING HERE

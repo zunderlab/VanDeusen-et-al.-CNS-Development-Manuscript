@@ -5,7 +5,7 @@
 #2) Rename umap_xy_R2.csv to umap_layout.csv
 #3) Convert R2_assigns.csv to clusters.csv
 
-print("Start 01_URD_Prep.R")
+print("Start URD_Prep.R")
 
 rm(list = ls())
 .libPaths(c(.libPaths(), "~/R/4.1.1"))
@@ -14,7 +14,6 @@ library(data.table)
 library(dplyr)
 
 ## Input parameters ===============================================================================
-
 INPUT.FOLDER <- getwd()
 OUTPUT.FOLDER <- INPUT.FOLDER
 EXPRESSION.MATRIX.FILENAME <- "/expression_matrix_analysis.csv" #Standard name for Pipeline2.0
@@ -64,8 +63,6 @@ read.clusters <- function(input.folder,clusters.filename = "/clusters.csv"){
   return(clusters)
 }
 
-
-
 ## Read needed files ==============================================================================
 expression.matrix <- fread(paste0(INPUT.FOLDER, EXPRESSION.MATRIX.FILENAME), stringsAsFactors = F)
 file.nums <- fread(paste0(INPUT.FOLDER, FILE.NUMBERS.FILENAME), stringsAsFactors = F)
@@ -97,6 +94,4 @@ clusters.out <- t(clusters.in)
 #Save output file
 fwrite(clusters.out,file = CLUSTERS.OUT.FILENAME,col.names = FALSE,sep = ",")
 
-print("Finished converting cluster_RX_assigns.csv to clusters.csv")
-
-print("End 00_URD_Prep.R")
+print("Finish URD_Prep.R")
