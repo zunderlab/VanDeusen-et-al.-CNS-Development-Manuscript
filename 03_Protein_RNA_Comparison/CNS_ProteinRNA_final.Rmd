@@ -1,0 +1,633 @@
+---
+title: "DRG Comparison From Concat Transform Files"
+output: html_notebook
+---
+#Outline:
+Section 1:
+1. Get Marker names from fcs file or panel file if pipeline scripts were used
+2. Add to google sheet: 
+  - (https://docs.google.com/spreadsheets/d/10Rm0-1t8EL8E7S5T952PU25HjK_jLURk_EcYHwgriDA/edit#gid=821856570)
+3. Get approved name/ensemble ids from HGNC and manual curation
+4. Use ensemble ids to get rna gene names from biomart... pay attn. to human vs. mouse (seem to be same for cns panel)
+
+Section 2:
+5. Get reasonable clusters for each dataset
+6. Use those gene names to subset RNA data (likely have to capitalize or lowercase both to do string matching)
+  - "/project/zunderlab/sarah_data/project_Protein_RNA/data/cerebellum_e11_e17/rna_preprocess_clust_layout.R"
+7. Same for mass cyt, use overlapping antibody names to subset data
+8. Summarize marker rexpression accross clusters for each of common markers
+  - (This is the data that then can be fed into various visualizations)
+
+```{r}
+library(plyr)
+library(dplyr)
+library(tidyr)
+library(Matrix)
+library(ggplot2)
+library(loomR) 
+
+PARENT_PATH <- "/project/zunderlab/sarah_data/project_Protein_RNA/data/cns_protein_rna_comparison" #getwd()
+
+##RNA
+rna.lamanno.panel.in <- read.csv(paste0(PARENT_PATH, "/rna_panel.csv"))
+rna.lamanno.panel.in$common_name <- as.character(rna.lamanno.panel.in$common_name)
+
+##PROTEIN
+protein.metadata.in <- read.csv(paste0(PARENT_PATH, "/protein_metadata.csv"))
+
+protein.panel.in <- read.csv(paste0(PARENT_PATH, "/protein_panel.csv"))
+protein.panel.in$common_name <- as.character(protein.panel.in$common_name)
+protein.panel.in$ab_name <- as.character(protein.panel.in$ab_name)
+protein.panel.in$ab_metal_label <- as.character(protein.panel.in$ab_metal_label)
+
+```
+
+
+# Prep each dataset for analyses based on summarized data 
+
+###RNA -- Le Manno single cell
+#### Generate summarized expression values for each gene by timepoint by brain region
+Adapted from: https://github.com/sagnera/tTF_paper_2020/blob/main/single_cell_analysis.R
+```{r}
+# Input parameters are tissue ("Forebrain"(subsets), "Midbrain", "Hindbrain" or "all"),  
+# age ("11", "12", "13", "14", "15", "16", "17", "18") and specific (specific = TRUE 
+# means only tissues precisely called as the tissue argument will be considered, 
+# specific = FALSE means all values that include the string passed to tissue will be considered 
+# [e.g. tissue = Forebrain, specific = FALSE will consider "Forebrain" and "ForebrainVentral"] ).
+# Genes are extracted automatically from loom file.
+
+heatmap_dotplot_filenames_list <- c("laManno_scRNA_telencephalon_summarizedTissueAge",
+                                    "laManno_scRNA_diencephalon_summarizedTissueAge",
+                                    "laManno_scRNA_mesencephalon_summarizedTissueAge",
+                                    "laManno_scRNA_rhombencephalon_summarizedTissueAge",
+                                    "laManno_scRNA_allTissues_summarizedTissueAge")#
+
+## Set variables: ###########################################################################################
+## Telencephalon
+age_tissue_df_t = data.frame("tissue" = c("all", "all", "ForebrainDorsal", "ForebrainDorsal", "ForebrainDorsal", "ForebrainDorsal", "ForebrainDorsal", "ForebrainDorsal"),
+                            "age" = c("11", "12", "13", "14", "15", "16", "17", "18"),
+                            "specific" = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE))
+## Diencephalon
+d_16_to_18 = c("ForebrainVentroLateral","ForebrainVentroThalamic")
+age_tissue_df_d = data.frame("tissue" = I(list("all", "all", "ForebrainVentral", "ForebrainVentral", "ForebrainVentral",d_16_to_18, d_16_to_18,d_16_to_18)),
+                           "age" = c("11", "12", "13", "14", "15", "16", "17", "18"),
+                           "specific" = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE))
+
+## Mesencephalon
+age_tissue_df_m = data.frame("tissue" = c("all", "all", "Midbrain", "Midbrain", "Midbrain", "Midbrain", "Midbrain", "Midbrain"),
+                           "age" = c("11", "12", "13", "14", "15", "16", "17", "18"),
+                           "specific" = c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE))
+
+## Rhombencephalon
+age_tissue_df_r = data.frame("tissue" = c("all", "all", "Hindbrain", "Hindbrain", "Hindbrain", "Hindbrain", "Hindbrain", "Hindbrain"),
+                           "age" = c("11", "12", "13", "14", "15", "16", "17", "18"),
+                           "specific" = c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE))
+
+## All tissues
+age_tissue_df_all = data.frame("tissue" = c("all", "all", "all", "all", "all", "all", "all", "all"),
+                           "age" = c("11", "12", "13", "14", "15", "16", "17", "18"),
+                           "specific" = c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE))
+
+variables_ls = c(age_tissue_df_t, age_tissue_df_d, age_tissue_df_m, age_tissue_df_r, age_tissue_df_all)
+
+## Prep genes and metadata from loom file
+## Make sure to set "PARENT_PATH" global variable at top of notebook
+genes = as.character(read.csv(paste0(PARENT_PATH, "/rna_panel.csv"))$common_name)
+genes = stringr::str_to_title(genes) #change to jsut first letter uppercase, as it is for rna seq gene names
+
+normalize = TRUE
+
+## Generate expression matrix consisting of gene levels, timepoint, and tissue######################
+## Connect to the loom file in read/write mode: #############################################################
+sc.loom <- connect(filename = paste0(PARENT_PATH, "/laManno_scRNA.loom"), mode = "r+", skip.validate = TRUE) 
+## Subset to only overlapping gene names
+genes <- genes[which(genes %in% sc.loom$row.attrs$Gene[])] 
+## Generate sc.meta file by extracting parameters from connected sc.loom file ###############################
+sc.meta <- data.frame(sc.loom$col.attrs$Age[], 
+                      sc.loom$col.attrs$PseudoAge[], 
+                      sc.loom$col.attrs$Tissue[], 
+                      sc.loom$col.attrs$PseudoTissue[],
+                      sc.loom$col.attrs$Class[],
+                      sc.loom$col.attrs$Clusters[],
+                      10000 / sc.loom$col.attrs$TotalUMI[])
+colnames(sc.meta) <- c("age", "pseudoage", "tissue", "pseudotissue", "class", "clusters", "normalization_factor")
+
+
+for (i in 1:5) {
+  heatmap_dotplot_filename = heatmap_dotplot_filenames_list[i]
+  age_tissue_df = variables_ls[i]
+  
+  cell.id.ls <- list()
+  for (i in 1:nrow(age_tissue_df)) {
+    print(i)
+    ## Get list of all tissues if appropriate: ###################################################################
+    if(age_tissue_df[i, "tissue"] == "all"){
+      print("all")
+      tissue = unique(sc.loom$col.attrs$Tissue[])
+      name = "all"
+    } else {
+      print("not all")
+      tissue = age_tissue_df[i, "tissue"]
+      name = age_tissue_df[i, "tissue"]
+    }
+  
+    ## Get desired subset of cell ids by tissue: ################################################################
+    if(!age_tissue_df[i, "specific"]){
+      print("not specific")
+      tissue.id <- which(grepl(tissue, unique(sc.loom$col.attrs$Tissue[])) == TRUE)
+      cell.id.ls[[i]] <- which(sc.meta$tissue %in% unique(sc.loom$col.attrs$Tissue[])[tissue.id] & grepl(age_tissue_df[i, "age"], sc.meta$age) == TRUE)
+    } else {
+      print("specific")
+      if(length(tissue) > 1){
+        print("length(tissue) > 1")
+        cell.id.ls[[i]] <- which(sc.meta$tissue %in% tissue & grepl(age_tissue_df[i, "age"], sc.meta$age) == TRUE)
+      } else {
+        print("length(tissue) NOT > 1")
+        cell.id.ls[[i]] <- which(sc.meta$tissue == tissue & grepl(age_tissue_df[i, "age"], sc.meta$age) == TRUE)
+      }
+    }
+  }
+  cell.id <- unlist(cell.id.ls)
+  
+  ## Get row nums for desired genes, subset, and normalize ######################################################
+  gene.id <- which(sc.loom$row.attrs$Gene[] %in% genes)
+  
+  ## Generate expression matrix consisting of gene levels, timepoint, and tissue ######################
+  if(normalize == TRUE) {
+    exp.mat <- sc.loom[["matrix"]][cell.id, gene.id] * sc.meta$normalization_factor[cell.id] 
+  } else {
+    exp.mat <- sc.loom[["matrix"]][cell.id, gene.id]
+  }
+  
+  ## Set colnames to be gene names: ############################################################################
+  colnames(exp.mat) <- sc.loom$row.attrs$Gene[gene.id]
+  
+  ## Combine expression with by-cell metadata into one matrix: ################################################
+  exp.mat <- cbind(exp.mat, sc.meta[cell.id, ])
+  ## Change ages to be named by grouped name defined in age_tissue_df ############################################
+  age_tissue_df$age <- as.character(age_tissue_df$age)
+  exp.mat$age <- as.character(exp.mat$age)
+  for (i in 1:nrow(age_tissue_df)) {
+    exp.mat[which(grepl(age_tissue_df[i, "age"], exp.mat$age) == TRUE),"age"] <- age_tissue_df[i, "age"]
+  }
+  
+  ###normalization function ##################################################################################
+  normalit<-function(x){
+    #x/(max(x))
+    (x-min(x))/(max(x)-min(x))
+  }
+  
+  ## calculate number of cells expressing a gene for each timepoint ###########################################
+  num.cells.expressing <- do.call(cbind, lapply(genes, function(x) {
+    print(x)
+    exprs.values <- exp.mat[,c(x, "age")]  %>%  
+      dplyr::group_by(age)  
+    
+    colnames(exprs.values)[1] <- "expression"
+    
+    exprs.values <- exprs.values %>%
+      dplyr::group_by(age) %>%
+      dplyr::summarise(count2 = length(expression[expression > 0]))
+    
+    return(exprs.values$count2)
+  }))
+  
+  colnames(num.cells.expressing) <- genes
+  
+  ## calculate percentage of expressing cells for color map #####################################################
+  perc.expressing <- plyr::count(exp.mat, c("age")) %>% #, "class"
+    dplyr::bind_cols(. ,as_tibble(num.cells.expressing)) %>%
+    dplyr::mutate_each(function(v){v / .[,"freq"]}, all_of(genes)) %>%
+    tidyr::gather(genename, percent, 3:(length(genes)+2), factor_key = TRUE) %>% #(would be 4 and 3 here if filtering by cell type)
+    dplyr::mutate(age = as.numeric(age)) %>%
+    dplyr::pull(percent)
+  
+  ## calculate average level of expression for the genes at each timepoint #######################################
+  sum.mat <- exp.mat %>%
+    dplyr::group_by(age) %>%
+    dplyr::select(c(age, all_of(genes))) %>%
+    dplyr::summarise_each(funs(mean)) %>%
+    dplyr::mutate(age = as.numeric(age)) %>%
+    dplyr::mutate_each(funs(normalit), all_of(genes)) %>%
+    tidyr::gather(genename, measurement, 2:(length(genes)+1), factor_key = TRUE) %>%
+    dplyr::mutate(percent = perc.expressing) ### merge with percent expressing cells
+  
+  ## Write summarized expression matrix to file ##############################################################################
+  sum.exprs.mean.filename <- paste0(PARENT_PATH, "/",heatmap_dotplot_filename, ".csv") 
+  write.csv(sum.mat, sum.exprs.mean.filename, row.names = FALSE)
+}
+
+```
+
+
+
+### PROTEIN
+#### Generate summarized expression values for each gene by timepoint by brain region
+Adapted from: https://github.com/sagnera/tTF_paper_2020/blob/main/single_cell_analysis.R
+```{r}
+# Input parameters are tissue ("Forebrain"(subsets), "Midbrain", "Hindbrain" or "all"),  
+# age ("11", "12", "13", "14", "15", "16", "17", "18") and specific (specific = TRUE 
+# means only tissues precisely called as the tissue argument will be considered, 
+# specific = FALSE means all values that include the string passed to tissue will be considered 
+# [e.g. tissue = Forebrain, specific = FALSE will consider "Forebrain" and "ForebrainVentral"] ).
+# Genes are extracted automatically from loom file.
+
+heatmap_dotplot_filenames_list <- c("protein_telencephalon_summarizedTissueAge",
+                                    "protein_diencephalon_summarizedTissueAge",
+                                    "protein_mesencephalon_summarizedTissueAge",
+                                    "protein_rhombencephalon_summarizedTissueAge",
+                                    "protein_allTissues_summarizedTissueAge")
+
+# Set variables: ###########################################################################################
+## Telencephalon
+age_tissue_df_t = data.frame("tissue" = c("Brain", "Brain", "Cortex", "Cortex", "Cortex", "Cortex", "Cortex", "Cortex", "Cortex", "Cortex", "Cortex", "Cortex", "Cortex"),
+                           "age" = c("11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"),
+                           "specific" = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE))
+## Diencephalon
+age_tissue_df_d = data.frame("tissue" = c("Brain", "Brain", "Diencephalon", "Diencephalon", "Diencephalon", "Diencephalon", "Diencephalon",
+                                        "Diencephalon", "Diencephalon", "Diencephalon", "Diencephalon", "Diencephalon", "Diencephalon"),
+                           "age" = c("11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"),
+                           "specific" = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE))
+## Mesencephalon
+age_tissue_df_m = data.frame("tissue" = c("Brain", "Brain", "Midbrain", "Midbrain", "Midbrain", "Midbrain", "Midbrain", "Midbrain", "Midbrain", "Midbrain", "Midbrain", "Midbrain", "Midbrain"),
+                           "age" = c("11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"),
+                           "specific" = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE))
+## Rhombencephalon
+age_tissue_df_r = data.frame("tissue" = c("Brain", "Brain", "Hindbrain", "Hindbrain", "Hindbrain", "Hindbrain", "Hindbrain", "Hindbrain", "Hindbrain", "Hindbrain", "Hindbrain", "Hindbrain", "Hindbrain"),
+                           "age" = c("11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"),
+                           "specific" = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE))
+## All tissues
+age_tissue_df_all = data.frame("tissue" = c("all", "all", "all", "all", "all", "all", "all", "all", "all", "all", "all", "all", "all"),
+                           "age" = c("11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"),
+                           "specific" = c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE))
+
+variables_ls = c(age_tissue_df_t, age_tissue_df_d, age_tissue_df_m, age_tissue_df_r, age_tissue_df_all)
+
+## Generate expression matrix consisting of gene levels, timepoint, and tissue######################
+## Connect to the loom file in read/write mode: #############################################################
+sc.loom <- connect(filename = paste0(PARENT_PATH, "/cns_protein.loom"), mode = "r+", skip.validate = TRUE)
+
+## Generate gene list from gene metadata ##### LOOKS LIKE I DON'T NEED THIS??????????????????????????????????????????????/
+genes <- sc.loom$row.attrs$common_name[which(sc.loom$row.attrs$summarize[] == 1)]
+genes <- stringr::str_to_title(genes) #change to jsut first letter uppercase, as it is for rna seq gene names
+
+## Generate sc.meta file by extracting parameters from connected sc.loom file ###############################
+sc.meta <- data.frame(sc.loom$col.attrs$timepoint_num[], 
+                      sc.loom$col.attrs$tissue[])
+colnames(sc.meta) <- c("age", "tissue")
+
+for (i in 1:5) {
+  heatmap_dotplot_filename = heatmap_dotplot_filenames_list[i]
+  age_tissue_df = variables_ls[i]  
+  
+  cell.id.ls <- list()
+  for (i in 1:nrow(age_tissue_df)) {
+    print(i)
+    ## Get list of all tissues if appropriate: ###################################################################
+    if(age_tissue_df[i, "tissue"] == "all"){
+      print("all")
+      tissue = unique(sc.loom$col.attrs$tissue[])
+      name = "all"
+    } else {
+      print("not all")
+      tissue = age_tissue_df[i, "tissue"]
+      name = age_tissue_df[i, "tissue"]
+    }
+  
+    ## Get desired subset of cell ids by tissue: ################################################################
+    if(!age_tissue_df[i, "specific"]){
+      print("not specific")
+      tissue.id <- which(grepl(tissue, unique(sc.loom$col.attrs$tissue[])) == TRUE)
+      cell.id.ls[[i]] <- which(sc.meta$tissue %in% unique(sc.loom$col.attrs$tissue[])[tissue.id] & grepl(age_tissue_df[i, "age"], sc.meta$age) == TRUE)
+    } else {
+      print("specific")
+      cell.id.ls[[i]] <- which(sc.meta$tissue %in% tissue & grepl(age_tissue_df[i, "age"], sc.meta$age) == TRUE)
+    }
+  }
+  cell.id <- unlist(cell.id.ls)
+  
+  ## Get row nums for desired genes to summarize ######################################################
+  gene.id <- which(sc.loom$row.attrs$summarize[] == 1)
+  
+  ## Generate expression matrix consisting of gene levels, timepoint, and tissue ######################
+  exp.mat <- sc.loom[["matrix"]][cell.id, gene.id]
+  
+  ## Set colnames to be gene names: ############################################################################
+  colnames(exp.mat) <- sc.loom$row.attrs$common_name[gene.id] #stringr::str_to_title()
+  
+  ## Combine expression with by-cell metadata into one matrix: ################################################
+  exp.mat <- cbind(exp.mat, sc.meta[cell.id, ]) 
+  ## Change ages to be named by grouped name defined in age_tissue_df ############################################
+  age_tissue_df$age <- as.character(age_tissue_df$age)
+  exp.mat$age <- as.character(exp.mat$age)
+  for (i in 1:nrow(age_tissue_df)) {
+    exp.mat[which(grepl(age_tissue_df[i, "age"], exp.mat$age) == TRUE),"age"] <- age_tissue_df[i, "age"]
+  }
+  
+  ###normalization function ##################################################################################
+  normalit<-function(x){
+    #x/(max(x))
+    (x-min(x))/(max(x)-min(x))
+  }
+  
+  ## Calculate number of cells expressing a gene for each timepoint ###########################################
+  ## First, read in and process "positive" cutoffs for the subset of markers that will be used for comparison
+  genes_and_thresholds <- data.frame("genes" = sc.loom$row.attrs$common_name[gene.id],
+                                     "thresholds" = sc.loom$row.attrs$optimized_thresh[gene.id]) 
+  genes <- sc.loom$row.attrs$common_name[gene.id]
+  thresholds <- sc.loom$row.attrs$optimized_thresh[gene.id]
+  
+  num.cells.expressing <- apply(genes_and_thresholds, 1, function(x) {
+    print(x[1])
+    print(x[2])
+    exprs.values <- exp.mat[,c(x[1], "age")]  %>%  
+      dplyr::group_by(age)
+  
+    colnames(exprs.values)[1] <- "expression"
+  
+    exprs.values <- exprs.values %>%
+      dplyr::group_by(age) %>%
+      dplyr::summarise(count2 = length(expression[expression > x[2]]))
+  
+    return(exprs.values$count2)
+  })
+  
+  colnames(num.cells.expressing) <- genes
+  
+  ## calculate percentage of expressing cells for color map #####################################################
+  perc.expressing <- plyr::count(exp.mat, c("age")) %>% #, "class"
+    dplyr::bind_cols(. ,as_tibble(num.cells.expressing)) %>%
+    dplyr::mutate_each(function(v){v / .[,"freq"]}, all_of(genes)) %>%
+    tidyr::gather(genename, percent, 3:(length(genes)+2), factor_key = TRUE) %>% #(would be 4 and 3 here if filtering by cell type)
+    dplyr::mutate(age = as.numeric(age)) %>%
+    dplyr::pull(percent)
+  
+  ## calculate average level of expression for the genes at each timepoint #######################################
+  sum.mat <- exp.mat %>%
+    dplyr::group_by(age) %>%
+    dplyr::select(c(age, all_of(genes))) %>%
+    dplyr::summarise_each(funs(mean)) %>%
+    dplyr::mutate(age = as.numeric(age)) %>%
+    dplyr::mutate_each(funs(normalit), all_of(genes)) %>%
+    tidyr::gather(genename, measurement, 2:(length(genes)+1), factor_key = TRUE) %>%
+    dplyr::mutate(percent = perc.expressing) ### merge with percent expressing cells
+  
+  ## Write summarized expression matrix to file ##############################################################################
+  sum.exprs.mean.filename <- paste0(PARENT_PATH, "/", heatmap_dotplot_filename, ".csv") 
+  write.csv(sum.mat, sum.exprs.mean.filename, row.names = FALSE)
+}
+```
+
+###CROSS CORRELATIONS
+```{r}
+rna.lamanno.sum.exprs <- read.csv(paste0(PARENT_PATH, "/laManno_scRNA_allTissues_summarizedTissueAge", ".csv"))
+protein.sum.exprs <- read.csv(paste0(PARENT_PATH, "/protein_allTissues_summarizedTissueAge", ".csv"))
+
+## Apply differencing
+rna.lamanno.sum.exprs.diff.ls <- list()
+protein.sum.exprs.diff.ls <- list()
+for (marker_name in unique(rna.lamanno.sum.exprs$genename)) {
+  rna_ls = rna.lamanno.sum.exprs[which(rna.lamanno.sum.exprs$genename == marker_name),"measurement"]
+  rna_temp_df = data.frame("age" = c(12,13,14,15,16,17,18),
+                           "genename" = c(rep(toupper(marker_name), 7)),
+                           "measurement" = diff(rna_ls, lag=1, differences = 1))
+  rna.lamanno.sum.exprs.diff.ls[[marker_name]] <- rna_temp_df
+  
+  protein_ls = protein.sum.exprs[which(protein.sum.exprs$genename == toupper(marker_name)),"measurement"]
+  protein_temp_df = data.frame("age" = c(12,13,14,15,16,17,18,19,20,21,22,23),
+                           "genename" = c(rep(toupper(marker_name), 12)),
+                           "measurement" = diff(protein_ls, lag=1, differences = 1))
+  protein.sum.exprs.diff.ls[[marker_name]] <- protein_temp_df
+}
+rna.lamanno.sum.exprs <- do.call(rbind, rna.lamanno.sum.exprs.diff.ls)
+protein.sum.exprs <- do.call(rbind, protein.sum.exprs.diff.ls)
+
+marker_name_ls = rna.lamanno.panel.in$common_name[which(rna.lamanno.panel.in$common_name != 'CD24')]
+## All tissues
+acf_ls = list()
+for (marker.name in marker_name_ls){
+  print(marker.name)
+  tissue.name = "allTissues"
+  rna.lamanno.sum.exprs$genename = toupper(rna.lamanno.sum.exprs$genename)
+  indices_rna = which(rna.lamanno.sum.exprs$genename == marker.name)
+  indices_protein = which(protein.sum.exprs$genename == marker.name)
+  ccf_out = ccf(rna.lamanno.sum.exprs$measurement[indices_rna],protein.sum.exprs$measurement[indices_protein])
+  acf_ls[[paste0(marker.name,"_allTissues")]] = ccf_out$acf[,1,1]
+}
+
+## Each tissue separately
+acf_ls = list()
+for (marker.name in marker_name_ls){
+  print(marker.name)
+  for (tissue.name in list("telencephalon", "diencephalon", "midbrain", "hindbrain")) {
+    rna.lamanno.sum.exprs <- read.csv(paste0(PARENT_PATH, "/laManno_scRNA_", tissue.name, "_summarizedTissueAge", ".csv")) #SansWB
+    rna.lamanno.sum.exprs$genename = toupper(rna.lamanno.sum.exprs$genename)
+    protein.sum.exprs <- read.csv(paste0(PARENT_PATH, "/protein_", tissue.name, "_summarizedTissueAge_newThresh", ".csv")) #SansWB
+    indices_rna = which(rna.lamanno.sum.exprs$genename == marker.name)
+    indices_protein = which(protein.sum.exprs$genename == marker.name)
+    
+    ccf_out = ccf(rna.lamanno.sum.exprs$measurement[indices_rna],protein.sum.exprs$measurement[indices_protein])
+    acf_ls[[paste0(marker.name,"_", tissue.name)]] = ccf_out$acf[,1,1]
+  }
+}
+
+acf_df = t(data.frame(acf_ls))
+df <- data.frame(cbind(newColName = rownames(acf_df), acf_df))
+rownames(df) <- 1:nrow(df)
+df = df %>% separate(newColName, c("marker", "tissue"), "_")
+colnames(df) = c("marker",
+                     "tissue",
+                      "lag_minus_6",
+                     "lag_minus_5",
+                     "lag_minus_4",
+                     "lag_minus_3",
+                     "lag_minus_2",
+                     "lag_minus_1",
+                     "lag_0",
+                     "lag_plus_1",
+                     "lag_plus_2",
+                     "lag_plus_3",
+                     "lag_plus_4",
+                     "lag_plus_5",
+                     "lag_plus_6")
+
+
+df$marker = protein.panel.in$ab_name[match(df$marker, protein.panel.in$common_name)] 
+
+write.csv(df, paste0(PARENT_PATH, "/protein_vs_rna_cross_corr_lags_ab_names_differenced.csv"), row.names = TRUE)
+write.csv(df, paste0("/project/zunderlab/prepped_data_for_amy/protein_vs_rna_cross_corr_lags_ab_names_differenced.csv"), row.names = TRUE)
+
+```
+
+###DYNAMIC TIME WARPING
+```{r}
+library(dtw)
+
+marker_name_ls = rna.lamanno.panel.in$common_name[which(rna.lamanno.panel.in$common_name != 'CD24')]
+for (marker.name in marker_name_ls){
+  print(marker.name)
+  #for (tissue.name in list("telencephalon", "diencephalon", "mesencephalon", "rhombencephalon")) {
+  tissue.name = "allTissues"
+  rna.lamanno.sum.exprs <- read.csv(paste0(PARENT_PATH, "/laManno_scRNA_", tissue.name, "_summarizedTissueAge", ".csv")) #SansWB
+  rna.lamanno.sum.exprs$genename = toupper(rna.lamanno.sum.exprs$genename)
+  protein.sum.exprs <- read.csv(paste0(PARENT_PATH, "/protein_", tissue.name, "_summarizedTissueAge", ".csv")) #SansWB
+  indices_rna = which(rna.lamanno.sum.exprs$genename == marker.name)
+  indices_protein = which(protein.sum.exprs$genename == marker.name)
+  dtw_out = dtw(protein.sum.exprs$measurement[indices_protein],rna.lamanno.sum.exprs$measurement[indices_rna],keep=TRUE)
+  protein_name = protein.panel.in$ab_name[which(protein.panel.in$common_name == marker.name)]
+  ##SAVE PLOTs
+  pdf(file = paste0(PARENT_PATH, "/figures/dtw_plots/", "dtw_densityPlot_", tissue.name, "_", protein_name, ".pdf"), 
+      width = 12, 
+      height = 8)
+  dtwPlotDensity(dtw_out)
+  dev.off()
+  
+  pdf(file = paste0(PARENT_PATH, "/figures/dtw_plots/", "dtw_2wayPlot_", tissue.name, "_", protein_name, ".pdf"), 
+      width = 12, 
+      height = 8)
+  dtwPlotTwoWay(dtw_out)
+  dev.off()
+  
+  pdf(file = paste0(PARENT_PATH, "figures/dtw_plots/", "dtw_3wayPlot_", tissue.name, "_", protein_name, ".pdf"), 
+      width = 12, 
+      height = 8)
+  dtwPlotThreeWay(dtw_out)
+  dev.off()
+  #}
+}
+
+```
+
+
+
+###COMBINED HEATMAP DOTPLOTS
+```{r}
+plot.mean.exp.combined.cns <- function(sum.mat, name){
+  # plot using ggplot
+  gg <- ggplot(data = as.data.frame(sum.mat), aes(x = factor(age), y = datasetID)) +
+    geom_point(aes(size = percent, color = measurement, alpha = dataBinary )) + 
+    scale_size_continuous(range = c(4,13)) +
+    scale_alpha_manual(values = c("1" = 1, "0" = 0), guide = "none") +
+    scale_color_viridis_c() +
+    scale_y_discrete(position = "right", limits = c("ABA ISH", "La Manno scRNA","Van Deusen scProtein")) + 
+    theme_classic() +
+    ylab("Dataset") +
+    xlab("embryonic days") +
+    facet_wrap(~genename_f, ncol = 1, strip.position = "left") +
+    ggtitle(name) +
+    labs(size="ratio expressing cells", color="normalized mean expression") +
+    theme(panel.background = element_rect(fill = "grey92", colour = NA),
+          axis.text.y = element_text(size = 10),
+          axis.title.y = element_blank(), #element_text(size = 11),
+          panel.spacing.y = unit(0.5, "lines"),
+          axis.text.x = element_text(size = 12, angle = 45, hjust = 1, vjust = 1),
+          axis.title.x = element_text(size = 11),
+          legend.title = element_text(size = 10),
+          legend.title.align=0.5,
+          legend.text = element_text(size = 10),
+          strip.text = element_text(size = 10, face = "bold"),
+          strip.placement = "outside",
+          strip.background = element_rect(fill = NULL,size = NULL,linetype = NULL,color = NULL), 
+          plot.title = element_text(face = "bold", size = 16))
+  
+  return(gg)
+}
+
+
+## RUN PLOTTING FUNCTION ON ALL SUMMARIZED PER TISSUE/AGE DATA ######################################################################
+
+tissue_name_ls <- c("telencephalon", "diencephalon", "mesencephalon", "rhombencephalon", "allTissues")
+plot_name_ls <- c("Telencephalon", "Diencephalon", "Mesencephalon", "Rhombencephalon", "All Tissues")
+
+for (i in 1:5) {
+  rna.lamanno.sum.exprs <- read.csv(paste0(PARENT_PATH, "/laManno_scRNA_", tissue_name_ls[i], "_summarizedTissueAge", ".csv"))
+  protein.sum.exprs <- read.csv(paste0(PARENT_PATH, "/protein_", tissue_name_ls[i], "_summarizedTissueAge", ".csv"))
+  rna.aba.sum.exprs <- read.csv(paste0(PARENT_PATH, "/aba_rna_", tissue_name_ls[i], "_summarizedTissueAge", ".csv"))
+  file_name <- paste0("comparison_", tissue_name_ls[i], "_tissueAgeSummarized_heatmapDotPlot.pdf")
+  plot_name <- plot_name_ls[i]
+  
+  ## Change protein genenames to match RNA capitalization format
+  protein.sum.exprs$genename <- stringr::str_to_title(protein.sum.exprs$genename)
+  
+  ## Keep any that are in LaManno
+  protein.sum.exprs <- protein.sum.exprs[which(protein.sum.exprs$genename %in% rna.lamanno.sum.exprs$genename),]
+  ## Add in missing timepoints with NA for La Manno : ################################################
+  total.time.points <- c(13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23) #11, 12, 
+  for (time.point in total.time.points) {
+    if (time.point %in% unique(rna.lamanno.sum.exprs$age) == FALSE) {
+      for (marker.name in unique(rna.lamanno.sum.exprs$genename)) {
+        rna.lamanno.sum.exprs[nrow(rna.lamanno.sum.exprs)+1,] <- NA
+        rna.lamanno.sum.exprs[nrow(rna.lamanno.sum.exprs),"age"] <- time.point
+        rna.lamanno.sum.exprs[nrow(rna.lamanno.sum.exprs),"genename"] <- marker.name
+      }
+    }
+  }
+  ## Add in missing timepoints with NA for ABA: ################################################
+  total.time.points <- c(13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23) #11, 12, 
+  for (time.point in total.time.points) {
+    if (time.point %in% unique(rna.aba.sum.exprs$age) == FALSE) {
+      for (marker.name in unique(rna.aba.sum.exprs$genename)) {
+        rna.aba.sum.exprs[nrow(rna.aba.sum.exprs)+1,] <- NA
+        rna.aba.sum.exprs[nrow(rna.aba.sum.exprs),"age"] <- time.point
+        rna.aba.sum.exprs[nrow(rna.aba.sum.exprs),"genename"] <- marker.name
+      }
+    }
+  }
+  
+  ## Add in missing GENES with NA for ABA: ################################################
+  #total.time.points <- c(13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23) #11, 12, 
+  for (marker.name in rna.lamanno.sum.exprs$genename) {
+    if (marker.name %in% unique(rna.aba.sum.exprs$genename) == FALSE) {
+      for (time.point in unique(rna.aba.sum.exprs$age)) {
+        rna.aba.sum.exprs[nrow(rna.aba.sum.exprs)+1,] <- NA
+        rna.aba.sum.exprs[nrow(rna.aba.sum.exprs),"age"] <- time.point
+        rna.aba.sum.exprs[nrow(rna.aba.sum.exprs),"genename"] <- marker.name
+      }
+    }
+  }
+  
+  ## Add column for dataset ID
+  rna.lamanno.sum.exprs$datasetID <- as.factor(rep("La Manno scRNA", nrow(rna.lamanno.sum.exprs)))
+  protein.sum.exprs$datasetID <- as.factor(rep("Van Deusen scProtein", nrow(protein.sum.exprs)))
+  rna.aba.sum.exprs$datasetID <- as.factor(rep("ABA ISH", nrow(rna.aba.sum.exprs)))
+  
+  # Bind into one df for plotting
+  sum.exprs.to.plot <- data.frame(rbind(rna.lamanno.sum.exprs, protein.sum.exprs, rna.aba.sum.exprs))
+  
+  # Change gene names to be protein marker names
+  sum.exprs.to.plot$genename <- toupper(as.character(sum.exprs.to.plot$genename)) 
+  sum.exprs.to.plot$genename <- protein.panel.in$ab_name[match(sum.exprs.to.plot$genename, protein.panel.in$common_name)] 
+  #Make it be ordered
+  plot_order_all <- order(protein.panel.in$plot_order)
+  plot_order <- plot_order_all[10:43] #dont take leading zeroes or trailing NA - rewrite to be less fragile/hard coded
+  genes_in_order <- protein.panel.in$ab_name[plot_order]
+  sum.exprs.to.plot$genename_f = factor(sum.exprs.to.plot$genename, levels=genes_in_order)
+  
+  #Create a new column representing if there is data for a timepoint, 
+  #so this can be used to define point shape in ggplot
+  sum.exprs.to.plot$dataBinary <- rep("1", nrow(sum.exprs.to.plot))
+  sum.exprs.to.plot$dataBinary[which(is.na(sum.exprs.to.plot$measurement))] <- rep("0", length(which(is.na(sum.exprs.to.plot$measurement))))
+  
+  sum.exprs.to.plot$measurement[which(is.na(sum.exprs.to.plot$measurement))] <- rep(0.5, length(which(is.na(sum.exprs.to.plot$measurement))))
+  sum.exprs.to.plot$percent[which(is.na(sum.exprs.to.plot$percent))] <- rep(1, length(which(is.na(sum.exprs.to.plot$percent))))
+  
+  #Generate plot
+  gg <- plot.mean.exp.combined.cns(sum.mat = sum.exprs.to.plot, name = plot_name)
+  
+  ##SAVE PLOT!
+  ggsave(paste0(PARENT_PATH, "/figures/heatmap_dot_plots/", file_name), 
+         device = 'pdf',
+         plot = gg,
+         width = 9.3,
+         height = 47.3)
+}
+```
+
+
+
+
+
+
+
+
+
