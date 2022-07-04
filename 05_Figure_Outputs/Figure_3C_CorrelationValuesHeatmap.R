@@ -1,4 +1,8 @@
-# Generate heatmap of lag values
+# Amy Van Deusen and Eli Zudner
+# 2022
+# Generate heatmap of protein/RNA correlation lag values
+
+print("Start CorrelationValuesHeatmap.R")
 
 rm(list = ls(all = TRUE))
 #.libPaths("/project/zunderlab/R/4.1.1_URD")
@@ -98,26 +102,4 @@ heat_with_dend <- function(basename, in_dend, in_data, file_out) {
 
 heat_with_dend("plot_original", hd, lags_in, file_out=FALSE)
 
-hd_mod <- flip_leaves(hd,hc$order[16:25],hc$order[26:34])
-heat_with_dend("plot_mod", hd_mod, lags_in, file_out=FALSE)
-
-hd_mod <- flip_leaves(hd_mod,hc$order[11:15],hc$order[9:10])
-heat_with_dend("plot_mod", hd_mod, lags_in, file_out=FALSE)
-
-hd_mod <- flip_leaves(hd_mod,hc$order[1:8],hc$order[c(11:15,9:10,26:34)])
-heat_with_dend("plot_mod", hd_mod, lags_in, file_out=FALSE)
-
-hd_mod <- flip_leaves(hd_mod,hc$order[19:25],hc$order[16:18])
-heat_with_dend("plot_mod", hd_mod, lags_in, file_out=FALSE)
-
-hd_mod <- flip_leaves(hd_mod,hc$order[1],hc$order[2:5])
-heat_with_dend("plot_mod", hd_mod, lags_in, file_out=FALSE)
-
-hd_mod <- flip_leaves(hd_mod,hc$order[2],hc$order[3])
-heat_with_dend("plot_mod", hd_mod, lags_in, file_out=FALSE)
-
-hd_mod <- flip_leaves(hd_mod,hc$order[3:2],hc$order[4:5])
-heat_with_dend("plot_mod", hd_mod, lags_in, file_out=FALSE)
-
-heat_with_dend("plot_mod", hd_mod, lags_in, file_out=TRUE)
-
+print("Finish CorrelationValuesHeatmap.R")
