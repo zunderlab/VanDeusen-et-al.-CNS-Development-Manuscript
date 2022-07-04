@@ -1,11 +1,7 @@
-#Amy Van Deusen and Eli Zunder
-#2022
-# Generate heatmap of lag correlation values
-
-print("Start CorrelationValuesHeatmap.R")
+# Generate heatmap of lag values
 
 rm(list = ls(all = TRUE))
-.libPaths("/R/4.1.1")
+#.libPaths("/project/zunderlab/R/4.1.1_URD")
 
 library(dplyr)
 library(ggplot2)
@@ -15,11 +11,12 @@ library(dendextend)
 library(ggdendro)
 library(gridExtra)
 
+
 # Input parameters
 INPUT_FOLDER <- getwd()
 OUTPUT_FOLDER <- INPUT_FOLDER
-LAG_VALUES_FILENAME <- "protein_vs_rna_cross_corr_lags_ab_names.csv"
-OUTPUT_BASENAME <- "CorrelationValues_Heatmap"
+LAG_VALUES_FILENAME <- "protein_vs_rna_cross_corr_lags_ab_names_differenced.csv"
+OUTPUT_BASENAME <- "LagValues_Heatmap"
 OUTPUT_DEVICE <- "pdf"
 
 TOP_MARGIN <- 15 # for heatmap
@@ -31,8 +28,8 @@ lag_filename <- paste0(INPUT_FOLDER,"/",LAG_VALUES_FILENAME)
 lags_in <- read.csv(lag_filename)
 
 # Combine rows by marker, to be used for clustering/ordering
-markers_all <- lags_in[,"Marker"]
-markers_unique <- unique(lags_in[,"Marker"])
+markers_all <- lags_in[,"marker"]
+markers_unique <- unique(lags_in[,"marker"])
 vals_only <- lags_in[,4:ncol(lags_in)]
 comb_vals <- c()
 for(m in markers_unique) {
@@ -48,7 +45,6 @@ hd <- as.dendrogram(hc)
 # References for leave swapping.  Run with this line commented out after final configuration is determined.
 labels(hd) <- paste0(1:34 , "_",labels(hd)) 
 
-
 # Set up function for outputting PDFs
 heat_with_dend <- function(basename, in_dend, in_data, file_out) {
   # Reorder heatmap dataset by dendrogram
@@ -61,6 +57,9 @@ heat_with_dend <- function(basename, in_dend, in_data, file_out) {
   
   # Reshape data for plotting
   plot_df <- melt(reordered_vals)
+  plot_df<- plot_df %>%
+    filter(variable !='X') %>%
+    mutate(Sample = paste0(marker,"_",tissue))
   plot_df$Sample <- factor(plot_df$Sample,levels=rev(unique(plot_df$Sample)))
   
   # Plot heatmap -- note that margins above should be adjusted to line up with dendrogram!
@@ -122,4 +121,3 @@ heat_with_dend("plot_mod", hd_mod, lags_in, file_out=FALSE)
 
 heat_with_dend("plot_mod", hd_mod, lags_in, file_out=TRUE)
 
-print("Start CorrelationValuesHeatmap.R")
