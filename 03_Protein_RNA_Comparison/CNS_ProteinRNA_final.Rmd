@@ -1,22 +1,33 @@
 ---
-title: "DRG Comparison From Concat Transform Files"
+title: "Developing CNS Protein RNA Comparison Analyses"
 output: html_notebook
 ---
 #Outline:
-Section 1:
-1. Get Marker names from fcs file or panel file if pipeline scripts were used
+Files generated prior to this script:
+
+- laManno_dev_cns_scRNAseq_preprocessed.loom, vanDeusen_dev_cns_cytof_preprocessed.loom
+  Datasets were preprocessed as described in the manuscript.
+  Of note, expression values were arcsinh transformed for cytof data, log+1 transformed for scRNAseq data
+
+- rna_protein_names_lookup_table.csv
+1. Get mass cytometry marker names from fcs files
 2. Add to google sheet: 
   - (https://docs.google.com/spreadsheets/d/10Rm0-1t8EL8E7S5T952PU25HjK_jLURk_EcYHwgriDA/edit#gid=821856570)
 3. Get approved name/ensemble ids from HGNC and manual curation
-4. Use ensemble ids to get rna gene names from biomart... pay attn. to human vs. mouse (seem to be same for cns panel)
+4. Use ensemble ids to get RNA gene names from biomart
 
-Section 2:
-5. Get reasonable clusters for each dataset
-6. Use those gene names to subset RNA data (likely have to capitalize or lowercase both to do string matching)
-  - "/project/zunderlab/sarah_data/project_Protein_RNA/data/cerebellum_e11_e17/rna_preprocess_clust_layout.R"
-7. Same for mass cyt, use overlapping antibody names to subset data
-8. Summarize marker rexpression accross clusters for each of common markers
-  - (This is the data that then can be fed into various visualizations)
+- aba_rna_<brain region>_summarizedTissueAge.csv
+  see script "get_prep_aba_data.R"
+
+
+Part 1: Summarize marker expression accross brain regions for each of common markers for LaManno scRNAseq and VanDeusen mass cytometry data
+  - (This is the data that then can be fed into the subsequent analyses and visualizations)
+  
+Part 2: Cross correlation analysis on differenced data
+  
+Part 3: Dynamic time warping analysis 
+  
+Part 4: Heatmap dotplots to directly visuale summarized percent expressing/mean expression data
 
 ```{r}
 library(plyr)
@@ -26,7 +37,7 @@ library(Matrix)
 library(ggplot2)
 library(loomR) 
 
-PARENT_PATH <- "/project/zunderlab/sarah_data/project_Protein_RNA/data/cns_protein_rna_comparison" #getwd()
+PARENT_PATH <- getwd() #or wherever all data files are
 
 ##RNA
 rna.lamanno.panel.in <- read.csv(paste0(PARENT_PATH, "/rna_panel.csv"))
@@ -43,7 +54,7 @@ protein.panel.in$ab_metal_label <- as.character(protein.panel.in$ab_metal_label)
 ```
 
 
-# Prep each dataset for analyses based on summarized data 
+#Part 1: Generate summarized datasets 
 
 ###RNA -- Le Manno single cell
 #### Generate summarized expression values for each gene by timepoint by brain region
@@ -378,7 +389,7 @@ for (i in 1:5) {
 }
 ```
 
-###CROSS CORRELATIONS
+#Part 2: CROSS CORRELATIONS
 ```{r}
 rna.lamanno.sum.exprs <- read.csv(paste0(PARENT_PATH, "/laManno_scRNA_allTissues_summarizedTissueAge", ".csv"))
 protein.sum.exprs <- read.csv(paste0(PARENT_PATH, "/protein_allTissues_summarizedTissueAge", ".csv"))
@@ -459,7 +470,7 @@ write.csv(df, paste0("/project/zunderlab/prepped_data_for_amy/protein_vs_rna_cro
 
 ```
 
-###DYNAMIC TIME WARPING
+#Part 3: DYNAMIC TIME WARPING
 ```{r}
 library(dtw)
 
@@ -500,8 +511,9 @@ for (marker.name in marker_name_ls){
 
 
 
-###COMBINED HEATMAP DOTPLOTS
+#Part 4: COMBINED HEATMAP DOTPLOT VISUALIZATIONS
 ```{r}
+## Plotting function:
 plot.mean.exp.combined.cns <- function(sum.mat, name){
   # plot using ggplot
   gg <- ggplot(data = as.data.frame(sum.mat), aes(x = factor(age), y = datasetID)) +
