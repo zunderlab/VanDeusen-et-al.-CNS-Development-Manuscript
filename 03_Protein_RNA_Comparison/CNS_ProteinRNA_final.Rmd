@@ -19,14 +19,11 @@ Files generated prior to this script:
 - aba_rna_<brain region>_summarizedTissueAge.csv
   see script "get_prep_aba_data.R"
 
-
+OUTLINE:
 Part 1: Summarize marker expression accross brain regions for each of common markers for LaManno scRNAseq and VanDeusen mass cytometry data
-  - (This is the data that then can be fed into the subsequent analyses and visualizations)
-  
-Part 2: Cross correlation analysis on differenced data
-  
-Part 3: Dynamic time warping analysis 
-  
+  - (This is the data that then can be fed into the subsequent analyses and visualizations)  
+Part 2: Cross correlation analysis on differenced data 
+Part 3: Dynamic time warping analysis  
 Part 4: Heatmap dotplots to directly visuale summarized percent expressing/mean expression data
 
 ```{r}
