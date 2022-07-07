@@ -1,0 +1,86 @@
+Cluster,Dot_Plot_Name,Plotting_Order,Color
+9,NSCs - Pax6highNestinhigh,1,#850760
+11,NSCs - Pax6highNestinlow,2,#FF2CDF
+6,NSCs - Pax6neg,3,#FFBDE5
+23,INPs - Tbr2highPax6low,4,#7A62F5
+13,INPs - Tbr2midPax6high,5,#7077FF
+30,INPs - Tbr2midNeuroD1high,6,#9192FF
+7,Neuronal Progenitors - Pax6highNeuNlow,7,#BEB5F5
+15,Neuronal Progenitors - Pax6highDCXhigh,8,#D1D1FF
+4,Neuronal Progenitors - Pax6highNeuroD1high,9,#C9E0FF
+8,Neuronal Progenitors - NeuroD1mid,10,#A1E0FF
+14,Neuronal Progenitors - Sox1highNeuroD1low,11,#9AC6FF
+58,Neuronal Progenitors - NeuroD1highCtip2high,12,#7AAAFC
+27,Neuronal Progenitors - NeuroD1/GAD65mixed,13,#61BAFF
+18,Neurons - Cux1lowTuJ1lowMAP2neg,14,#1B9AFF
+17,Neurons - Cux1low,15,#0073FF
+32,Neurons - Tbr2mixedTbr1lowCux1high,16,#0039FF
+24,Neurons - Tbr1highCtip2highCux1low,17,#2100FA
+25,Neurons - Ctip2highCux1low,18,#4767BF
+29,Inhibitory Neurons - Pax6high,19,#C0FFF9
+22,Inhibitory Neurons - Sox1high,20,#9CFFFF
+19,Inhibitory Neurons - Non-Cortical,21,#5EF8FF
+20,Inhibitory Neurons - Ctip2highDCXlow,22,#85CCCC
+21,Inhibitory Neurons - Ctip2high,23,#00B0B2
+26,Inhibitory Neurons - TrkBhighP75NTRhigh,24,#3A91A1
+33,Dopaminergic Neurons - ALDH1A1high,25,#001A82
+46,RGCs/GPCs - GLASThighBLBPlowPax6low,26,#CE1C99
+35,RGCs/GPCs - Sox2high,27,#FF85A2
+37,RGCs/GPCs - A2B5low,28,#FF80EC
+38,RGCs/GPCs - CD133highCD24highMAP2low,29,#E9A5B5
+10,Olig2high NPCs - Nestinhigh,30,#A90F7B
+12,Olig2high NPCs - Nestinlow,31,#DD10A0
+28,Olig2high NPCs - Olig2/Tbr2/Ctip2mixed,32,#7E82EA
+40,Olig2high NPCs -NestinhighVCAMhighDCXlow,33,#8BADF1
+43,Olig2mid Glial Prec.- - Olig2mixed,34,#FF6ECA
+39,Olig2mid Glial Prec.- GFAPhigh Astroglia,35,#F00E8E
+3,Olig2mid Glial Prec.- Olig2highBLBPlowNestinlow,36,#C15BA3
+45,Olig2mid Glial Prec. - Olig2lowBLBPneg,37,#811CA0
+36,Olig2mid Glial Prec. - Olig2midBLBPlow,38,#A21DAF
+42,Olig2mid Glial Prec. - Olig2midBLBPlowSox2low,39,#D651E6
+34,Olig2mid Glial Prec. - Olig2midBLBPlowGLASTlow,40,#D57DBB
+41,Olig2mid Glial Prec. - Olig2midBLBPlowGLASTlowNestinhigh,41,#E4C4F5
+54,OPCs - Olig2low,42,#D098FF
+52,OPCs - Olig2high,43,#C87CEE
+51,OPCs - Sox2lowKi67high,44,#CD57FF
+50,OPCs - Sox10lowKi67high,45,#B154FF
+48,OPCs - Sox10low,46,#A127F3
+56,OPCs - Sox10lowNestinhigh,47,#8405E6
+55,OPCs - Sox10lowDCXhigh,48,#A886BB
+49,OPCs - Sox10highPDFGRαneg,49,#AC74BE
+69,Nonneural Cells - PDGFRαhigh,50,#92EA78
+72,Nonneural Cells - PDGFRαlowOlig2lowVCAMhigh,51,#C3FFB1
+63,Nonneural Cells - PDGFRαhighP75NTRhigh,52,#36E044
+68,Nonneural Cells - PDGFRαlowP75NTRlowCD133high,53,#53C931
+65,Nonneural Cells - P75NTRlowNcadlow,54,#11AB19
+67,Nonneural Cells - A2B5low,55,#297C0E
+85,Erythromyeloid Prog. - CD45highPECAMhigh,56,#816866
+66,Endothelial Cells - A2B5highNestinhigh,57,#D2B39A
+71,Endothelial Cells - A2B5lowNcadhighCD133low,58,#BE9A7A
+70,Endothelial Cells - A2B5lowLy6Chigh,59,#C9835D
+62,Endothelial Cells - Ly6Chigh,60,#B87133
+64,Endothelial Cells - Ncadlow,61,#BA6666
+47,Mural Doublets - MCAMhighBLBPhighGLASThigh,62,#935AA4
+61,Mural Doublets - MCAMhighSox10high,63,#7E4EAC
+2,Mural Doublets - MCAMhighTuJ1low,64,#755334
+16,Mural Doublets - PDGFRbhighNeuNhighTbr2low,65,#592926
+74,Microglia - SSEA1low,66,#FFD08D
+75,Microglia - Ki67low,67,#FFA230
+76,Microglia - Ki67high,68,#FF9D69
+77,Microglia - A2B5highCux1low,69,#FF881A
+78,Microglia - A2B5low,70,#FF6B21
+81,Microglia - CD24low,71,#D74F00
+79,Other Hema. Cells - CD45highCD11bhigh,72,#CF3636
+73,Microglia - TuJ1low,73,#32B2F2
+82,Microglia - DCXhighTuJ1highNeuNlow,74,#2342AE
+31,Microglia - CD24lowCl.Casp.3high,75,#4771FF
+44,Microglia - Sox2highBLBPhighGLASTlow,76,#FFC1F6
+57,Microglia - Olig2highSox10low,77,#C096FF
+84,Microglia - OligoO4high,78,#A646C3
+80,Other Hema. Cells - Other Blood Cells,79,#FC1212
+83,Other Hema. Cells - CD45high Monocytes,80,#F27F7F
+53,Non-Brain Neural - Sox10highP75NTRlowSox2low,81,#FFED00
+59,Non-Brain Neural - Sox10highALDH1A1high,82,#5A0076
+1,Apoptotic Cells - Cl.Casp.3high,83,#787878
+60,Apoptotic Cells - Cl.Casp.3highOligoO4high,84,#474747
+5,Low-Complexity Cells,85,#DDDCDE
